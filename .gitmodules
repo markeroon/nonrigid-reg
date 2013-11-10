@@ -4,3 +4,6 @@
 [submodule "lib"]
 	path = lib
 	url = https://github.com/markeroon/file_management
+[submodule "lib/file_management"]
+	path = lib/file_management
+	url = https://github.com/markeroon/file_management
