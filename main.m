@@ -1,6 +1,6 @@
 % bundle adjustment
-addpath( 'icp' );
-addpath( 'file_management' );
+
+addpath( 'lib/file_management' );
 addpath( genpath( 'vendor/coherent-point-drift' ) );
 
 R =  [ 0.9101   -0.4080    0.0724 ;
