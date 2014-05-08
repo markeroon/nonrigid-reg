@@ -1,0 +1,41 @@
+
+This distribution contains the KDTREE, KDTREEIDX and KDRANGEQUERY functions.
+
+**** IMPORTANT ***
+You will need to compile the code in the kdtree/src library using the
+MATLAB mex compiler.
+
+You can simply try to use the following commands or 
+type "help mex" to learn more about compiling mex-functions.
+
+>> cd kdtree/lib
+>> edit ../src/kdtree_common.h   % Edit this file to set your system headers.
+>> mex ../src/kdtree.cc
+>> mex ../src/kdtreeidx.cc
+>> mex ../src/kdrangequery.cc
+
+These instructions will make sure that the compiled mex files end up in your 
+kdtree/lib directory. If they end up elsewhere, move them into the kdtree/lib directory.
+
+Finally, be sure to add the kdtree/lib directory to your MATLAB PATH.
+
+**** IMPORTANT ***
+
+Two demo scripts are provided (kdtree_demo.m & kdrange_demo.m).
+
+Written by / send comments or suggestions to :
+ Guy Shechter
+ guy at jhu dot edu
+ October 2013
+
+Change Log:
+October 2013:
+    +  Updated include file headers in kdtree/src/kdtree_common.h
+    +  Better mex compilation instructions in the README file
+
+June 2004:
+	+  You can now use N dimensional data points, where N>3.
+	+  Use KDTREEIND to return the index value to the closest point, 
+	   instead of the closest point values.
+	+  KDRANGEQUERY can now return these index values as well.
+

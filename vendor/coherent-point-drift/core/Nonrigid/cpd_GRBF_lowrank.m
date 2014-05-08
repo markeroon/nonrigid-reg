@@ -73,7 +73,7 @@ end
 sigma2_init=sigma2;
 
 % Find 'numeig' eigenvectors of the affinity matrix G
-[Q,S]=cpd_GRBF_lowrankQS(Y, beta, numeig, eigfgt);
+[Q,S]=cpd_GRBF_lowrankQSParallel(Y, beta, numeig, eigfgt);
 invS=spdiags(1./diag(S),0,numeig,numeig);
 
 
