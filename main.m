@@ -21,7 +21,7 @@ scans_rigid = cell(n,1);
 scans_nonrigid = cell(n,1);
 for q=1:n
     
-filename = sprintf( 'data/PlantDataPly/plants_converted82-%03d-clean-clear.ply', q-1 );
+filename = sprintf( '~/Data/PlantDataPly/plants_converted82-%03d-clean-clear.ply', q-1 );
 [Elements_0,varargout_0] = plyread(filename);
 
 

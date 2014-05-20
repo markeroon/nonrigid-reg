@@ -17,7 +17,8 @@ p          = 6;      % Order of truncation (default p = 8)
 
 % computer Pt1 and denomP
 [xc , A_k] = fgt_model(Y' , ones(1,M), hsigma, e,K,p);
-Kt1 = fgt_predict(X' , xc , A_k , hsigma,e);
+%Kt1 = fgt_predict(X' , xc , A_k , hsigma,e);
+Kt1 = fgt_predict_parallel(X, xc, A_k, hsigma, e);
 
 ndi=outliers/(1-outliers)*M/N*(2*pi*sigma2)^(0.5*D);
 denomP=(Kt1+ndi);
@@ -25,12 +26,15 @@ Pt1=1-ndi./denomP;Pt1=Pt1';
 
 % compute P1
 [xc , A_k] = fgt_model(X' , 1./denomP, hsigma, e,K,p);
-P1 = fgt_predict(Y' , xc , A_k , hsigma,e); P1=P1';
+%P1 = fgt_predict(Y' , xc , A_k , hsigma,e);
+P1 = fgt_predict_parallel(Y , xc , A_k , hsigma,e);
+P1=P1';
 
 % compute PX
 for i=1:D
  [xc , A_k] = fgt_model(X' , X(:,i)'./denomP, hsigma, e,K,p);
- PX(i,:) = fgt_predict(Y' , xc , A_k , hsigma,e); 
+ %PX(i,:) = fgt_predict(Y' , xc , A_k , hsigma,e); 
+  PX(i,:) = fgt_predict_parallel(Y , xc , A_k , hsigma,e);
 end
 PX=PX';
 
