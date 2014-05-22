@@ -32,13 +32,11 @@ for j=1:q-1
         X = X_dash';
 end
 
-
-%idx = find( X(:,1) < -14 & X(:,2) < 290 & X(:,3) < 678 );
-%X = X( idx,:);
 scans_sampled{q} = X(1:20:end,:);
-scans{q} = X;
+scans{q} = scans_sampled{q};
 end
 
+%{
 opt.method = 'rigid'; %'nonrigid_lowrank';
 opt.tol = 1e-12;
 opt.viz = 1;
@@ -49,10 +47,7 @@ opt.rot = 0;
 opt.normalize = 0;
 opt.outliers = 0.8;
 opt.max_it = 40;
-%opt.numeig = 40;
-%opt.eigfgt=1;
 
-%{
 for j=1:5
     for i=1:n
         all_scans = build_allscans_matrix( i, scans );
@@ -66,7 +61,7 @@ end
 
 
 opt.method = 'nonrigid_lowrank';
-opt.tol = 1e-12;
+opt.tol = 1e-5;
 opt.viz = 1;
 opt.fgt = 2;
 opt.scale = 0;
@@ -84,33 +79,17 @@ T = cpd_register( scans{1},scans{2},opt);
 time = toc
 save( 'savedfile','T','scans' );
 
-X = scans{1};
-Y = T.Y;
+%X = scans{1};
+%Y = T.Y;
 
-[tmp,tmp,treeroot_y] = kdtree(Y,[]);
-[idx_y] = kdtreeidx([],X,treeroot_y);
-
-[tmp,tmp,treeroot_x] = kdtree(X,[]);
-[idx_x] = kdtreeidx([],Y,treeroot_x);
-
-match = 1:size(X,1);
-idx_match = idx_x( idx_y );
-idx_matched_y = find( (match' - idx_match) == 0 );
-
-X_matched = X(idx_matched_y,:);
-idx = kdtreeidx([],X_matched,treeroot_y);
-dist = norm( X_matched - Y(idx,:) );
-
-[tmp,tmp,treeroot_y] = kdtree(Y,[]);
-idx = kdtreeidx([],X_matched,treeroot_y);
-err = norm( X_matched - Y(idx,:) ) / size(idx,1);
+%[cp,dist,treeroot_y] = kdtree(Y,X);
 
 opt.method = 'nonrigid_lowrank';
 opt.outliers = 0.9;
 opt.lambda = 1;
 opt.beta = 60;
 opt.normalize = 1;
-opt.max_it = 60;
+opt.max_it = 20;
 
 
 %outlier_vals = [ 0.7 0.6 0.5 0.4 0.3 0.3 0.4 0.5 0.6 0.6 0.7 0.7];
@@ -120,6 +99,7 @@ for i=1:12
             %opt.outliers = outlier_vals(j);
             T = cpd_register(scans{i},scans{j},opt);
             scans{j} = T.Y;
+            [cp,dist,treeroot_y] = kdtree(scans{i},scans{j});
         end
     end
 end
