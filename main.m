@@ -36,9 +36,10 @@ scans_sampled{q} = X(1:20:end,:);
 scans{q} = scans_sampled{q};
 end
 
-%{
-opt.method = 'rigid'; %'nonrigid_lowrank';
-opt.tol = 1e-12;
+
+opt.method = 'rigid'; 
+
+opt.tol = 1e-5;
 opt.viz = 1;
 opt.fgt = 2;
 opt.scale = 0;
@@ -48,17 +49,13 @@ opt.normalize = 0;
 opt.outliers = 0.8;
 opt.max_it = 40;
 
-for j=1:5
+%for j=1:5
     for i=1:n
         all_scans = build_allscans_matrix( i, scans );
         T = cpd_register(all_scans,scans{i},opt);
         scans{i} = T.Y;
     end
-end
-%}
-
-
-
+%end
 
 opt.method = 'nonrigid_lowrank';
 opt.tol = 1e-5;
@@ -89,17 +86,32 @@ opt.outliers = 0.9;
 opt.lambda = 1;
 opt.beta = 60;
 opt.normalize = 1;
-opt.max_it = 20;
+opt.max_it = 80;
+opt.tol = 1e-10;
+opt.fgt = 2;
+opt.eigfgt = 1;
+opt.numeig = 30;
 
 
 %outlier_vals = [ 0.7 0.6 0.5 0.4 0.3 0.3 0.4 0.5 0.6 0.6 0.7 0.7];
-for i=1:12
+K = 10000;
+h = 120;
+e = 10;
+p = 8;
+
+for i=1:12      
     for j=1:12
-        if j ~= 6
+        %if j ~= 6
             %opt.outliers = outlier_vals(j);
-            T = cpd_register(scans{i},scans{j},opt);
-            scans{j} = T.Y;
-            [cp,dist,treeroot_y] = kdtree(scans{i},scans{j});
-        end
+        
+        %weight = 
+        all_scans = build_allscans_matrix( j, scans );
+        [xc , A_k] = fgt_model( ...
+                all_scans', ones(size(all_scans,1),1)', ...
+                 h , e , K , p);
+        T = cpd_register(xc',scans{j},opt);
+        scans{j} = T.Y;
+        [cp,dist,treeroot_y] = kdtree(scans{i},scans{j});
+        %end
     end
 end
