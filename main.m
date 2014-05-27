@@ -2,8 +2,10 @@
 
 addpath( 'lib/file_management' );
 addpath( genpath( 'vendor/coherent-point-drift' ) );
-%addpath( genpath( '~/matlab/fast-coherent-point-drift' ) );
 addpath('vendor/kdtree/lib' )
+addpath('vendor/kdtree-mex/' );
+addpath('vendor/mahalanobis/' );
+addpath('lib/anisotropic_filter/');
 
 R =  [ 0.9101   -0.4080    0.0724 ;
        0.4118    0.8710   -0.2681 ;
@@ -37,61 +39,48 @@ scans{q} = scans_sampled{q};
 end
 
 
-opt.method = 'rigid'; 
-
-opt.tol = 1e-5;
-opt.viz = 1;
-opt.fgt = 2;
-opt.scale = 0;
-% allow for reflections -> rot = 0
-opt.rot = 0;
-opt.normalize = 0;
-opt.outliers = 0.8;
-opt.max_it = 40;
-
-%for j=1:5
+%{
+for j=1:5
     for i=1:n
         all_scans = build_allscans_matrix( i, scans );
         T = cpd_register(all_scans,scans{i},opt);
         scans{i} = T.Y;
     end
-%end
+end
+%}
 
-opt.method = 'nonrigid_lowrank';
-opt.tol = 1e-5;
 opt.viz = 1;
-opt.fgt = 2;
 opt.scale = 0;
 % allow for reflections -> rot = 0
-opt.rot = 1;
-opt.normalize = 1;
-% NOTE THAT THIS HAS BEEN CHANGED!
-%opt.eigfgt = 1;
-%opt.numeig = 50;
-opt.max_it = 40;
-opt.lambda = 1;
-opt.beta = 60;
-tic
-T = cpd_register( scans{1},scans{2},opt);
-time = toc
-save( 'savedfile','T','scans' );
-
-%X = scans{1};
-%Y = T.Y;
-
-%[cp,dist,treeroot_y] = kdtree(Y,X);
-
+opt.rot = 0;
 opt.method = 'nonrigid_lowrank';
-opt.outliers = 0.9;
-opt.lambda = 1;
+opt.outliers = 0.3;
+opt.lambda = 4;
 opt.beta = 60;
 opt.normalize = 1;
 opt.max_it = 80;
 opt.tol = 1e-10;
 opt.fgt = 2;
-opt.eigfgt = 1;
-opt.numeig = 30;
 
+idx_nearest_x = cell(12,1);
+dist_nearest_y = cell(12,1);
+map = cell(12,1);
+for i=2:12
+    [idx_nearest_x{i},dist_nearest_y{i}] = getMutualNeighbours( scans{1}, scans{i} );
+    %map{i} = containers.Map( idx_nearest_x{i}', dist_nearest_y{i} );
+end
+
+idx_x = cell2mat( idx_nearest_x' );
+sum_dist = zeros(size(idx_x));
+for i=2:length(idx_x)
+    for j=2:12
+        idx = find( idx_x(i) == idx_nearest_x{j} );
+        if ~isempty(idx)
+            sum_dist(i) = sum_dist(i) + dist_nearest_y{j}(idx);
+        end
+        sprintf( 'iter number %d complete', j )
+    end
+end
 
 %outlier_vals = [ 0.7 0.6 0.5 0.4 0.3 0.3 0.4 0.5 0.6 0.6 0.7 0.7];
 K = 10000;
@@ -100,18 +89,11 @@ e = 10;
 p = 8;
 
 for i=1:12      
-    for j=1:12
-        %if j ~= 6
-            %opt.outliers = outlier_vals(j);
-        
-        %weight = 
-        all_scans = build_allscans_matrix( j, scans );
-        [xc , A_k] = fgt_model( ...
-                all_scans', ones(size(all_scans,1),1)', ...
-                 h , e , K , p);
-        T = cpd_register(xc',scans{j},opt);
+    for j=2:12
+        %all_scans = build_allscans_matrix( j, scans );
+        less_than_scans = build_lessthan_scans_matrix( j, scans );
+        T = cpd_register(less_than_scans,scans{j},opt);
         scans{j} = T.Y;
-        [cp,dist,treeroot_y] = kdtree(scans{i},scans{j});
-        %end
+        [cp,dist,treeroot_y] = kdtree(scans{j+1},scans{j});
     end
 end
