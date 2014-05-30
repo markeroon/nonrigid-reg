@@ -66,8 +66,7 @@ idx_nearest_x = cell(12,1);
 dist_nearest_y = cell(12,1);
 map = cell(12,1);
 for i=2:12
-    [idx_nearest_x{i},dist_nearest_y{i}] = getMutualNeighbours( scans{1}, scans{i} );
-    %map{i} = containers.Map( idx_nearest_x{i}', dist_nearest_y{i} );
+    [idx_nearest_x{i},points{i}] = getMutualNeighbours( scans{1}, scans{i} );
 end
 
 idx_x = cell2mat( idx_nearest_x' );
