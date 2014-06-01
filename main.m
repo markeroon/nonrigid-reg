@@ -62,15 +62,22 @@ opt.max_it = 80;
 opt.tol = 1e-10;
 opt.fgt = 2;
 
+Y_nearest = cell(12,1);
 idx_nearest_x = cell(12,1);
-dist_nearest_y = cell(12,1);
+%dist_nearest_y = cell(12,1);
 map = cell(12,1);
 for i=2:12
-    [idx_nearest_x{i},points{i}] = getMutualNeighbours( scans{1}, scans{i} );
+    [idx_nearest_x{i},points{i},Y_nearest{i}] = getMutualNeighbours( scans{1}, scans{i} );
 end
 
-idx_x = cell2mat( idx_nearest_x' );
-sum_dist = zeros(size(idx_x));
+Y_c = [];
+for j=1:size(scans{1},1)
+    Y_c = [Y_c ; [getCentroidOfPointsAt( Y_nearest, j )]];
+    
+end
+
+%{
+cluster_center = 
 for i=2:length(idx_x)
     for j=2:12
         idx = find( idx_x(i) == idx_nearest_x{j} );
@@ -80,7 +87,7 @@ for i=2:length(idx_x)
         sprintf( 'iter number %d complete', j )
     end
 end
-
+%}
 %outlier_vals = [ 0.7 0.6 0.5 0.4 0.3 0.3 0.4 0.5 0.6 0.6 0.7 0.7];
 K = 10000;
 h = 120;
