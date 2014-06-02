@@ -39,23 +39,33 @@ scans{q} = scans_sampled{q};
 end
 
 
+%{
+for j=1:5
+    for i=1:n
+        all_scans = build_allscans_matrix( i, scans );
+        T = cpd_register(all_scans,scans{i},opt);
+        scans{i} = T.Y;
+    end
+end
+%}
+
 opt.viz = 1;
 opt.scale = 0;
 % allow for reflections -> rot = 0
 opt.rot = 0;
 opt.method = 'nonrigid_lowrank';
 opt.outliers = 0.3;
-opt.lambda = 1;
-opt.beta = 90;
+opt.lambda = 4;
+opt.beta = 60;
 opt.normalize = 1;
 opt.max_it = 80;
 opt.tol = 1e-10;
 opt.fgt = 2;
 
-%{
 Y_nearest = cell(12,1);
 idx_nearest_x = cell(12,1);
-points = cell(12,1);
+%dist_nearest_y = cell(12,1);
+map = cell(12,1);
 for i=2:12
     [idx_nearest_x{i},points{i},Y_nearest{i}] = getMutualNeighbours( scans{1}, scans{i} );
 end
@@ -65,9 +75,21 @@ for j=1:size(scans{1},1)
     Y_c = [Y_c ; [getCentroidOfPointsAt( Y_nearest, j )]];
     
 end
-%}
-%Y_c_2 = getMutualNeighbourCentroids( scans, 1 );
 
+Y_c_2 = getMutualNeighbourCentroids( scans, 1 );
+
+%{
+cluster_center = 
+for i=2:length(idx_x)
+    for j=2:12
+        idx = find( idx_x(i) == idx_nearest_x{j} );
+        if ~isempty(idx)
+            sum_dist(i) = sum_dist(i) + dist_nearest_y{j}(idx);
+        end
+        sprintf( 'iter number %d complete', j )
+    end
+end
+%}
 %outlier_vals = [ 0.7 0.6 0.5 0.4 0.3 0.3 0.4 0.5 0.6 0.6 0.7 0.7];
 K = 10000;
 h = 120;
@@ -76,11 +98,10 @@ p = 8;
 
 for i=1:12      
     for j=2:12
-        scans_c = getMutualNeighbourCentroids( scans, 1 );
-        T = cpd_register(scans_c,scans{j},opt);
+        %all_scans = build_allscans_matrix( j, scans );
+        less_than_scans = build_lessthan_scans_matrix( j, scans );
+        T = cpd_register(less_than_scans,scans{j},opt);
         scans{j} = T.Y;
-        %[cp,dist,treeroot_y] = kdtree(scans{j+1},scans{j});
-        %tree_y = kdtree_build(Y);
-        %[idx_y(i)] = kdtree_k_nearest_neighbors( tree_y, X(i,:), k );
+        [cp,dist,treeroot_y] = kdtree(scans{j+1},scans{j});
     end
 end
