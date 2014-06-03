@@ -75,8 +75,9 @@ e = 10;
 p = 8;
 
 for i=1:12      
-    for j=2:12
-        scans_c = getMutualNeighbourCentroids( scans, 1 );
+    for j=1:12
+        sprintf( 'outer loop #%d, scan #%d', [i j])
+        scans_c = getMutualNeighbourCentroids( scans, j );
         T = cpd_register(scans_c,scans{j},opt);
         scans{j} = T.Y;
         %[cp,dist,treeroot_y] = kdtree(scans{j+1},scans{j});
