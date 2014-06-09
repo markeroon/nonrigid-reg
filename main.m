@@ -66,6 +66,7 @@ for i=1:3
 end
 scans_save = scans;
 
+opt.method = 'nonrigid_lowrank';
 opt.normalize = 1;
 for i=1:60
     for j=1:12
