@@ -7,14 +7,12 @@ function [ X_c ] = getCentroidOfPointsAt( Y_mutual, index )
         if isempty(Y_mutual{c})
             ;
         elseif isempty(Y_mutual_vec)
-            index
             Y_mutual_vec = Y_mutual{c}(index,:);
         else
             Y_mutual_vec = [Y_mutual_vec ;[Y_mutual{c}(index,:)]];
         end
     end
     X_c = getCentroidOfPoints( Y_mutual_vec );
-    index
 end
 
 function [X_c] = getCentroidOfPoints( X_all )

@@ -13,8 +13,8 @@ R =  [ 0.9101   -0.4080    0.0724 ;
 t = [ 63.3043,  234.5963, -46.8392 ];
 
 % stop and restart parallel pool
-%delete(gcp)
-%parpool('LocalProfile1')
+delete(gcp)
+parpool('LocalProfile1')
 
 n = 12;
 scans=cell(n,1);
@@ -43,38 +43,31 @@ opt.viz = 1;
 opt.scale = 0;
 % allow for reflections -> rot = 0
 opt.rot = 0;
-opt.method = 'nonrigid_lowrank';
-opt.outliers = 0.3;
-opt.lambda = 1;
-opt.beta = 90;
+opt.method = 'rigid';
+opt.outliers = 0.1;
+opt.lambda = 2;%1;
+opt.beta = 8;%90;
 opt.normalize = 1;
-opt.max_it = 80;
+opt.max_it = 40;
 opt.tol = 1e-10;
 opt.fgt = 2;
+opt.eigfgt = 1;
+opt.numeig = 100;%floor( size(scans{1},1) / 300 );
 
-%{
-Y_nearest = cell(12,1);
-idx_nearest_x = cell(12,1);
-points = cell(12,1);
-for i=2:12
-    [idx_nearest_x{i},points{i},Y_nearest{i}] = getMutualNeighbours( scans{1}, scans{i} );
+
+for i=1:3
+    T = cpd_register( scans{12}, scans{1}, opt );
+    scans{1} = T.Y;
+    % rigid pre-alignment
+    for j=1:11
+        T = cpd_register( scans{j},scans{j+1},opt );
+        scans{j+1} = T.Y;
+    end
 end
+scans_save = scans;
 
-Y_c = [];
-for j=1:size(scans{1},1)
-    Y_c = [Y_c ; [getCentroidOfPointsAt( Y_nearest, j )]];
-    
-end
-%}
-%Y_c_2 = getMutualNeighbourCentroids( scans, 1 );
-
-%outlier_vals = [ 0.7 0.6 0.5 0.4 0.3 0.3 0.4 0.5 0.6 0.6 0.7 0.7];
-K = 10000;
-h = 120;
-e = 10;
-p = 8;
-
-for i=1:12      
+opt.normalize = 1;
+for i=1:60
     for j=1:12
         sprintf( 'outer loop #%d, scan #%d', [i j])
         scans_c = getMutualNeighbourCentroids( scans, j );
